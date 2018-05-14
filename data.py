@@ -36,7 +36,7 @@ class webvisionData(Dataset):
         #    image = img.convert('RGB')
         image = Image.open(img_path).convert('RGB')
         image = self.transform(image)
-        return image, torch.Tensor([label])
+        return image, torch.Tensor([label]).uniform_(0, CLASS_NUM).long()
 
     def __len__(self): # 输出每一个epoch的迭代数
         return self.ListNum

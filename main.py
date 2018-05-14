@@ -54,7 +54,7 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5
 # Data
 TRAIN_LIST_PATH = '../info/train_filelist_all.txt'
 VALID_LIST_PATH = '../info/val_filelist.txt'
-BATCH_SZIE = 256
+BATCH_SZIE = 512
 
 print('==> Preparing data..')
 transform_train = transforms.Compose([
@@ -83,7 +83,7 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 # learning rate decay
 def adjust_learning_rate(epoch):
-    lr = args.lr * (0.1 ** (epoch // 3))
+    lr = args.lr * (0.1 ** (epoch // 2))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
@@ -95,11 +95,13 @@ def train(epoch):
     correct = 0
     total = 0
     for batch_idx, (inputs, targets) in enumerate(trainloader):
-        inputs, targets = Variable(inputs.cuda()), Variable(targets.cuda())
-        print(inputs.size(), targets.size())
+        inputs, targets = inputs.cuda(), targets.cuda()
+        targets = targets.view(-1)
+        # print(inputs.size(), targets.size())
         optimizer.zero_grad()
         outputs = net(inputs)
-        print(outputs.size())
+        # print(outputs)
+        # print(targets)
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -120,7 +122,8 @@ def test(epoch):
     total = 0
     with torch.no_grad():
         for batch_idx, (inputs, targets) in enumerate(testloader):
-            inputs, targets = Variable(inputs.cuda()), Variable(targets.cuda())
+            inputs, targets = inputs.cuda(), targets.cuda()
+            targets = targets.view(-1)
             outputs = net(inputs)
             loss = criterion(outputs, targets)
 
@@ -147,7 +150,7 @@ def test(epoch):
         best_acc = acc
 
 
-for epoch in range(start_epoch, start_epoch+12):
+for epoch in range(start_epoch, start_epoch+8):
     adjust_learning_rate(epoch)
     train(epoch)
     test(epoch)
